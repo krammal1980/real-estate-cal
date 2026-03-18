@@ -1,0 +1,1578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getDatabase, ref, set, get, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyB7yjxEP8FNJWHeujrYJB5sHVHS6iZgAC0",
+    authDomain: "re-calculator-a1929.firebaseapp.com",
+    databaseURL: "https://re-calculator-a1929-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "re-calculator-a1929",
+    storageBucket: "re-calculator-a1929.firebasestorage.app",
+    messagingSenderId: "576203608546",
+    appId: "1:576203608546:web:9a50d1023f5339ee6169bb"
+  };
+
+  const app   = initializeApp(firebaseConfig);
+  const db    = getDatabase(app);
+
+  // ── Expose Firebase helpers to global scope ──────────────────────────────
+  window.fbSet = (path, data) => set(ref(db, path), data);
+  window.fbGet = (path) => get(ref(db, path)).then(s => s.exists() ? s.val() : null);
+  window.fbRemove = (path) => remove(ref(db, path));
+  window.fbListen = (path, cb) => onValue(ref(db, path), snap => cb(snap.exists() ? snap.val() : null));
+  window.firebaseReady = true;
+  document.dispatchEvent(new Event('firebase-ready'));
+  console.log('Firebase connected');
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Real Estate Project Calculator</title>
+
+<!-- PWA Meta Tags -->
+<meta name="application-name" content="RE Calculator">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RE Calc">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjAwIj4KICA8cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgcng9IjQwIiBmaWxsPSIjMGUxNjIxIi8+CiAgPHJlY3QgeD0iMjUiIHk9IjEyNyIgd2lkdGg9IjI4IiBoZWlnaHQ9IjczIiBmaWxsPSIjNWI5YmQ1Ii8+CiAgPHJlY3QgeD0iMjkiIHk9IjEzNCIgd2lkdGg9IjciIGhlaWdodD0iNyIgZmlsbD0iIzBlMTYyMSIvPgogIDxyZWN0IHg9IjQwIiB5PSIxMzQiIHdpZHRoPSI3IiBoZWlnaHQ9IjciIGZpbGw9IiMwZTE2MjEiLz4KICA8cmVjdCB4PSIyOSIgeT0iMTQ2IiB3aWR0aD0iNyIgaGVpZ2h0PSI3IiBmaWxsPSIjMGUxNjIxIi8+CiAgPHJlY3QgeD0iNDAiIHk9IjE0NiIgd2lkdGg9IjciIGhlaWdodD0iNyIgZmlsbD0iIzBlMTYyMSIvPgogIDxyZWN0IHg9IjU3IiB5PSIxMDUiIHdpZHRoPSIzNCIgaGVpZ2h0PSI5NSIgZmlsbD0iIzRlODhjMCIvPgogIDxyZWN0IHg9IjYxIiB5PSIxMTMiIHdpZHRoPSI4IiBoZWlnaHQ9IjgiIGZpbGw9IiMwZTE2MjEiLz4KICA8cmVjdCB4PSI3NSIgeT0iMTEzIiB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjMGUxNjIxIi8+CiAgPHJlY3QgeD0iNjEiIHk9IjEyNyIgd2lkdGg9IjgiIGhlaWdodD0iOCIgZmlsbD0iIzBlMTYyMSIvPgogIDxyZWN0IHg9Ijc1IiB5PSIxMjciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiIGZpbGw9IiMwZTE2MjEiLz4KICA8cmVjdCB4PSI2MSIgeT0iMTQxIiB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjMGUxNjIxIi8+CiAgPHJlY3QgeD0iNzUiIHk9IjE0MSIgd2lkdGg9IjgiIGhlaWdodD0iOCIgZmlsbD0iIzBlMTYyMSIvPgogIDxyZWN0IHg9IjYxIiB5PSIxNTUiIHdpZHRoPSI4IiBoZWlnaHQ9IjgiIGZpbGw9IiNkNGU0ZjQiLz4KICA8cmVjdCB4PSI3NSIgeT0iMTU1IiB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjMGUxNjIxIi8+CiAgPHJlY3QgeD0iOTYiIHk9IjYyIiB3aWR0aD0iNDYiIGhlaWdodD0iMTM4IiBmaWxsPSIjNWI5YmQ1Ii8+CiAgPHJlY3QgeD0iMTE1IiB5PSI0NCIgd2lkdGg9IjgiIGhlaWdodD0iMjAiIGZpbGw9IiM1YjliZDUiLz4KICA8cmVjdCB4PSIxMTciIHk9IjM0IiB3aWR0aD0iNCIgaGVpZ2h0PSIxMiIgZmlsbD0iIzViOWJkNSIvPgogIDxyZWN0IHg9IjEwMSIgeT0iNzIiIHdpZHRoPSI5IiBoZWlnaHQ9IjkiIGZpbGw9IiMwZTE2MjEiLz4KICA8cmVjdCB4PSIxMTQiIHk9IjcyIiB3aWR0aD0iOSIgaGVpZ2h0PSI5IiBmaWxsPSIjMGUxNjIxIi8+CiAgPHJlY3QgeD0iMTI3IiB5PSI3MiIgd2lkdGg9IjkiIGhlaWdodD0iOSIgZmlsbD0iIzBlMTYyMSIvPgogIDxyZWN0IHg9IjEwMSIgeT0iODciIHdpZHRoPSI5IiBoZWlnaHQ9IjkiIGZpbGw9IiMwZTE2MjEiLz4KICA8cmVjdCB4PSIxMTQiIHk9Ijg3IiB3aWR0aD0iOSIgaGVpZ2h0PSI5IiBmaWxsPSIjZDRlNGY0Ii8+CiAgPHJlY3QgeD0iMTI3IiB5PSI4NyIgd2lkdGg9IjkiIGhlaWdodD0iOSIgZmlsbD0iIzBlMTYyMSIvPgogIDxyZWN0IHg9IjEwMSIgeT0iMTAyIiB3aWR0aD0iOSIgaGVpZ2h0PSI5IiBmaWxsPSIjMGUxNjIxIi8+CiAgPHJlY3QgeD0iMTE0IiB5PSIxMDIiIHdpZHRoPSI5IiBoZWlnaHQ9IjkiIGZpbGw9IiMwZTE2MjEiLz4KICA8cmVjdCB4PSIxMjciIHk9IjEwMiIgd2lkdGg9IjkiIGhlaWdodD0iOSIgZmlsbD0iI2Q0ZTRmNCIvPgogIDxyZWN0IHg9IjEwMSIgeT0iMTE3IiB3aWR0aD0iOSIgaGVpZ2h0PSI5IiBmaWxsPSIjZDRlNGY0Ii8+CiAgPHJlY3QgeD0iMTE0IiB5PSIxMTciIHdpZHRoPSI5IiBoZWlnaHQ9IjkiIGZpbGw9IiMwZTE2MjEiLz4KICA8cmVjdCB4PSIxMjciIHk9IjExNyIgd2lkdGg9IjkiIGhlaWdodD0iOSIgZmlsbD0iIzBlMTYyMSIvPgogIDxyZWN0IHg9IjEwMSIgeT0iMTMyIiB3aWR0aD0iOSIgaGVpZ2h0PSI5IiBmaWxsPSIjMGUxNjIxIi8+CiAgPHJlY3QgeD0iMTE0IiB5PSIxMzIiIHdpZHRoPSI5IiBoZWlnaHQ9IjkiIGZpbGw9IiNkNGU0ZjQiLz4KICA8cmVjdCB4PSIxMjciIHk9IjEzMiIgd2lkdGg9IjkiIGhlaWdodD0iOSIgZmlsbD0iIzBlMTYyMSIvPgogIDxyZWN0IHg9IjEwMSIgeT0iMTQ3IiB3aWR0aD0iOSIgaGVpZ2h0PSI5IiBmaWxsPSIjMGUxNjIxIi8+CiAgPHJlY3QgeD0iMTE0IiB5PSIxNDciIHdpZHRoPSI5IiBoZWlnaHQ9IjkiIGZpbGw9IiMwZTE2MjEiLz4KICA8cmVjdCB4PSIxMjciIHk9IjE0NyIgd2lkdGg9IjkiIGhlaWdodD0iOSIgZmlsbD0iI2Q0ZTRmNCIvPgogIDxyZWN0IHg9IjE0NiIgeT0iMTE4IiB3aWR0aD0iMzAiIGhlaWdodD0iODIiIGZpbGw9IiMzYTZlOWUiLz4KICA8cmVjdCB4PSIxNTAiIHk9IjEyNSIgd2lkdGg9IjciIGhlaWdodD0iNyIgZmlsbD0iIzBlMTYyMSIvPgogIDxyZWN0IHg9IjE2MSIgeT0iMTI1IiB3aWR0aD0iNyIgaGVpZ2h0PSI3IiBmaWxsPSIjMGUxNjIxIi8+CiAgPHJlY3QgeD0iMTUwIiB5PSIxMzciIHdpZHRoPSI3IiBoZWlnaHQ9IjciIGZpbGw9IiMwZTE2MjEiLz4KICA8cmVjdCB4PSIxNjEiIHk9IjEzNyIgd2lkdGg9IjciIGhlaWdodD0iNyIgZmlsbD0iI2Q0ZTRmNCIvPgogIDxyZWN0IHg9IjE1MCIgeT0iMTQ5IiB3aWR0aD0iNyIgaGVpZ2h0PSI3IiBmaWxsPSIjMGUxNjIxIi8+CiAgPHJlY3QgeD0iMTYxIiB5PSIxNDkiIHdpZHRoPSI3IiBoZWlnaHQ9IjciIGZpbGw9IiMwZTE2MjEiLz4KICA8cmVjdCB4PSIxNSIgeT0iMTk4IiB3aWR0aD0iMTcwIiBoZWlnaHQ9IjQiIGZpbGw9IiM0ZTdmYTgiIHJ4PSIyIi8+Cjwvc3ZnPg==">
+<meta name="theme-color" content="#5b9bd5">
+<meta name="mobile-web-app-capable" content="yes">
+
+<!-- PWA Manifest (inline as data URI so no server needed) -->
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjogIlJlYWwgRXN0YXRlIFByb2plY3QgQ2FsY3VsYXRvciIsICJzaG9ydF9uYW1lIjogIlJFIENhbGMiLCAiZGVzY3JpcHRpb24iOiAiUmVhbCBFc3RhdGUgRmxvb3IgQXJlYSAmIFByb2ZpdCBDYWxjdWxhdG9yIC0gQnkgRW5nLiBLYXNzZW0gUmFtbWFsIiwgInN0YXJ0X3VybCI6ICIuIiwgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwZTE2MjEiLCAidGhlbWVfY29sb3IiOiAiIzViOWJkNSIsICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsICJpY29ucyI6IFt7InNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUI0Yld4dWN6MGlhSFIwY0RvdkwzZDNkeTUzTXk1dmNtY3ZNakF3TUM5emRtY2lJSFpwWlhkQ2IzZzlJakFnTUNBeU1EQWdNakF3SWo0S0lDQThjbVZqZENCM2FXUjBhRDBpTWpBd0lpQm9aV2xuYUhROUlqSXdNQ0lnY25nOUlqUXdJaUJtYVd4c1BTSWpNR1V4TmpJeElpOCtDaUFnUEhKbFkzUWdlRDBpTWpVaUlIazlJakV5TnlJZ2QybGtkR2c5SWpJNElpQm9aV2xuYUhROUlqY3pJaUJtYVd4c1BTSWpOV0k1WW1RMUlpOCtDaUFnUEhKbFkzUWdlRDBpTWpraUlIazlJakV6TkNJZ2QybGtkR2c5SWpjaUlHaGxhV2RvZEQwaU55SWdabWxzYkQwaUl6QmxNVFl5TVNJdlBnb2dJRHh5WldOMElIZzlJalF3SWlCNVBTSXhNelFpSUhkcFpIUm9QU0kzSWlCb1pXbG5hSFE5SWpjaUlHWnBiR3c5SWlNd1pURTJNakVpTHo0S0lDQThjbVZqZENCNFBTSXlPU0lnZVQwaU1UUTJJaUIzYVdSMGFEMGlOeUlnYUdWcFoyaDBQU0kzSWlCbWFXeHNQU0lqTUdVeE5qSXhJaTgrQ2lBZ1BISmxZM1FnZUQwaU5EQWlJSGs5SWpFME5pSWdkMmxrZEdnOUlqY2lJR2hsYVdkb2REMGlOeUlnWm1sc2JEMGlJekJsTVRZeU1TSXZQZ29nSUR4eVpXTjBJSGc5SWpVM0lpQjVQU0l4TURVaUlIZHBaSFJvUFNJek5DSWdhR1ZwWjJoMFBTSTVOU0lnWm1sc2JEMGlJelJsT0Roak1DSXZQZ29nSUR4eVpXTjBJSGc5SWpZeElpQjVQU0l4TVRNaUlIZHBaSFJvUFNJNElpQm9aV2xuYUhROUlqZ2lJR1pwYkd3OUlpTXdaVEUyTWpFaUx6NEtJQ0E4Y21WamRDQjRQU0kzTlNJZ2VUMGlNVEV6SWlCM2FXUjBhRDBpT0NJZ2FHVnBaMmgwUFNJNElpQm1hV3hzUFNJak1HVXhOakl4SWk4K0NpQWdQSEpsWTNRZ2VEMGlOakVpSUhrOUlqRXlOeUlnZDJsa2RHZzlJamdpSUdobGFXZG9kRDBpT0NJZ1ptbHNiRDBpSXpCbE1UWXlNU0l2UGdvZ0lEeHlaV04wSUhnOUlqYzFJaUI1UFNJeE1qY2lJSGRwWkhSb1BTSTRJaUJvWldsbmFIUTlJamdpSUdacGJHdzlJaU13WlRFMk1qRWlMejRLSUNBOGNtVmpkQ0I0UFNJMk1TSWdlVDBpTVRReElpQjNhV1IwYUQwaU9DSWdhR1ZwWjJoMFBTSTRJaUJtYVd4c1BTSWpNR1V4TmpJeElpOCtDaUFnUEhKbFkzUWdlRDBpTnpVaUlIazlJakUwTVNJZ2QybGtkR2c5SWpnaUlHaGxhV2RvZEQwaU9DSWdabWxzYkQwaUl6QmxNVFl5TVNJdlBnb2dJRHh5WldOMElIZzlJall4SWlCNVBTSXhOVFVpSUhkcFpIUm9QU0k0SWlCb1pXbG5hSFE5SWpnaUlHWnBiR3c5SWlOa05HVTBaalFpTHo0S0lDQThjbVZqZENCNFBTSTNOU0lnZVQwaU1UVTFJaUIzYVdSMGFEMGlPQ0lnYUdWcFoyaDBQU0k0SWlCbWFXeHNQU0lqTUdVeE5qSXhJaTgrQ2lBZ1BISmxZM1FnZUQwaU9UWWlJSGs5SWpZeUlpQjNhV1IwYUQwaU5EWWlJR2hsYVdkb2REMGlNVE00SWlCbWFXeHNQU0lqTldJNVltUTFJaTgrQ2lBZ1BISmxZM1FnZUQwaU1URTFJaUI1UFNJME5DSWdkMmxrZEdnOUlqZ2lJR2hsYVdkb2REMGlNakFpSUdacGJHdzlJaU0xWWpsaVpEVWlMejRLSUNBOGNtVmpkQ0I0UFNJeE1UY2lJSGs5SWpNMElpQjNhV1IwYUQwaU5DSWdhR1ZwWjJoMFBTSXhNaUlnWm1sc2JEMGlJelZpT1dKa05TSXZQZ29nSUR4eVpXTjBJSGc5SWpFd01TSWdlVDBpTnpJaUlIZHBaSFJvUFNJNUlpQm9aV2xuYUhROUlqa2lJR1pwYkd3OUlpTXdaVEUyTWpFaUx6NEtJQ0E4Y21WamRDQjRQU0l4TVRRaUlIazlJamN5SWlCM2FXUjBhRDBpT1NJZ2FHVnBaMmgwUFNJNUlpQm1hV3hzUFNJak1HVXhOakl4SWk4K0NpQWdQSEpsWTNRZ2VEMGlNVEkzSWlCNVBTSTNNaUlnZDJsa2RHZzlJamtpSUdobGFXZG9kRDBpT1NJZ1ptbHNiRDBpSXpCbE1UWXlNU0l2UGdvZ0lEeHlaV04wSUhnOUlqRXdNU0lnZVQwaU9EY2lJSGRwWkhSb1BTSTVJaUJvWldsbmFIUTlJamtpSUdacGJHdzlJaU13WlRFMk1qRWlMejRLSUNBOGNtVmpkQ0I0UFNJeE1UUWlJSGs5SWpnM0lpQjNhV1IwYUQwaU9TSWdhR1ZwWjJoMFBTSTVJaUJtYVd4c1BTSWpaRFJsTkdZMElpOCtDaUFnUEhKbFkzUWdlRDBpTVRJM0lpQjVQU0k0TnlJZ2QybGtkR2c5SWpraUlHaGxhV2RvZEQwaU9TSWdabWxzYkQwaUl6QmxNVFl5TVNJdlBnb2dJRHh5WldOMElIZzlJakV3TVNJZ2VUMGlNVEF5SWlCM2FXUjBhRDBpT1NJZ2FHVnBaMmgwUFNJNUlpQm1hV3hzUFNJak1HVXhOakl4SWk4K0NpQWdQSEpsWTNRZ2VEMGlNVEUwSWlCNVBTSXhNRElpSUhkcFpIUm9QU0k1SWlCb1pXbG5hSFE5SWpraUlHWnBiR3c5SWlNd1pURTJNakVpTHo0S0lDQThjbVZqZENCNFBTSXhNamNpSUhrOUlqRXdNaUlnZDJsa2RHZzlJamtpSUdobGFXZG9kRDBpT1NJZ1ptbHNiRDBpSTJRMFpUUm1OQ0l2UGdvZ0lEeHlaV04wSUhnOUlqRXdNU0lnZVQwaU1URTNJaUIzYVdSMGFEMGlPU0lnYUdWcFoyaDBQU0k1SWlCbWFXeHNQU0lqWkRSbE5HWTBJaTgrQ2lBZ1BISmxZM1FnZUQwaU1URTBJaUI1UFNJeE1UY2lJSGRwWkhSb1BTSTVJaUJvWldsbmFIUTlJamtpSUdacGJHdzlJaU13WlRFMk1qRWlMejRLSUNBOGNtVmpkQ0I0UFNJeE1qY2lJSGs5SWpFeE55SWdkMmxrZEdnOUlqa2lJR2hsYVdkb2REMGlPU0lnWm1sc2JEMGlJekJsTVRZeU1TSXZQZ29nSUR4eVpXTjBJSGc5SWpFd01TSWdlVDBpTVRNeUlpQjNhV1IwYUQwaU9TSWdhR1ZwWjJoMFBTSTVJaUJtYVd4c1BTSWpNR1V4TmpJeElpOCtDaUFnUEhKbFkzUWdlRDBpTVRFMElpQjVQU0l4TXpJaUlIZHBaSFJvUFNJNUlpQm9aV2xuYUhROUlqa2lJR1pwYkd3OUlpTmtOR1UwWmpRaUx6NEtJQ0E4Y21WamRDQjRQU0l4TWpjaUlIazlJakV6TWlJZ2QybGtkR2c5SWpraUlHaGxhV2RvZEQwaU9TSWdabWxzYkQwaUl6QmxNVFl5TVNJdlBnb2dJRHh5WldOMElIZzlJakV3TVNJZ2VUMGlNVFEzSWlCM2FXUjBhRDBpT1NJZ2FHVnBaMmgwUFNJNUlpQm1hV3hzUFNJak1HVXhOakl4SWk4K0NpQWdQSEpsWTNRZ2VEMGlNVEUwSWlCNVBTSXhORGNpSUhkcFpIUm9QU0k1SWlCb1pXbG5hSFE5SWpraUlHWnBiR3c5SWlNd1pURTJNakVpTHo0S0lDQThjbVZqZENCNFBTSXhNamNpSUhrOUlqRTBOeUlnZDJsa2RHZzlJamtpSUdobGFXZG9kRDBpT1NJZ1ptbHNiRDBpSTJRMFpUUm1OQ0l2UGdvZ0lEeHlaV04wSUhnOUlqRTBOaUlnZVQwaU1URTRJaUIzYVdSMGFEMGlNekFpSUdobGFXZG9kRDBpT0RJaUlHWnBiR3c5SWlNellUWmxPV1VpTHo0S0lDQThjbVZqZENCNFBTSXhOVEFpSUhrOUlqRXlOU0lnZDJsa2RHZzlJamNpSUdobGFXZG9kRDBpTnlJZ1ptbHNiRDBpSXpCbE1UWXlNU0l2UGdvZ0lEeHlaV04wSUhnOUlqRTJNU0lnZVQwaU1USTFJaUIzYVdSMGFEMGlOeUlnYUdWcFoyaDBQU0kzSWlCbWFXeHNQU0lqTUdVeE5qSXhJaTgrQ2lBZ1BISmxZM1FnZUQwaU1UVXdJaUI1UFNJeE16Y2lJSGRwWkhSb1BTSTNJaUJvWldsbmFIUTlJamNpSUdacGJHdzlJaU13WlRFMk1qRWlMejRLSUNBOGNtVmpkQ0I0UFNJeE5qRWlJSGs5SWpFek55SWdkMmxrZEdnOUlqY2lJR2hsYVdkb2REMGlOeUlnWm1sc2JEMGlJMlEwWlRSbU5DSXZQZ29nSUR4eVpXTjBJSGc5SWpFMU1DSWdlVDBpTVRRNUlpQjNhV1IwYUQwaU55SWdhR1ZwWjJoMFBTSTNJaUJtYVd4c1BTSWpNR1V4TmpJeElpOCtDaUFnUEhKbFkzUWdlRDBpTVRZeElpQjVQU0l4TkRraUlIZHBaSFJvUFNJM0lpQm9aV2xuYUhROUlqY2lJR1pwYkd3OUlpTXdaVEUyTWpFaUx6NEtJQ0E4Y21WamRDQjRQU0l4TlNJZ2VUMGlNVGs0SWlCM2FXUjBhRDBpTVRjd0lpQm9aV2xuYUhROUlqUWlJR1pwYkd3OUlpTTBaVGRtWVRnaUlISjRQU0l5SWk4K0Nqd3ZjM1puUGc9PSIsICJzaXplcyI6ICJhbnkiLCAidHlwZSI6ICJpbWFnZS9zdmcreG1sIiwgInB1cnBvc2UiOiAiYW55IG1hc2thYmxlIn1dfQ==">
+
+<!-- Inline SVG icon for home screen -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjAwIj4KICA8cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgcng9IjQwIiBmaWxsPSIjMGUxNjIxIi8+CiAgPHJlY3QgeD0iMjUiIHk9IjEyNyIgd2lkdGg9IjI4IiBoZWlnaHQ9IjczIiBmaWxsPSIjNWI5YmQ1Ii8+CiAgPHJlY3QgeD0iMjkiIHk9IjEzNCIgd2lkdGg9IjciIGhlaWdodD0iNyIgZmlsbD0iIzBlMTYyMSIvPgogIDxyZWN0IHg9IjQwIiB5PSIxMzQiIHdpZHRoPSI3IiBoZWlnaHQ9IjciIGZpbGw9IiMwZTE2MjEiLz4KICA8cmVjdCB4PSIyOSIgeT0iMTQ2IiB3aWR0aD0iNyIgaGVpZ2h0PSI3IiBmaWxsPSIjMGUxNjIxIi8+CiAgPHJlY3QgeD0iNDAiIHk9IjE0NiIgd2lkdGg9IjciIGhlaWdodD0iNyIgZmlsbD0iIzBlMTYyMSIvPgogIDxyZWN0IHg9IjU3IiB5PSIxMDUiIHdpZHRoPSIzNCIgaGVpZ2h0PSI5NSIgZmlsbD0iIzRlODhjMCIvPgogIDxyZWN0IHg9IjYxIiB5PSIxMTMiIHdpZHRoPSI4IiBoZWlnaHQ9IjgiIGZpbGw9IiMwZTE2MjEiLz4KICA8cmVjdCB4PSI3NSIgeT0iMTEzIiB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjMGUxNjIxIi8+CiAgPHJlY3QgeD0iNjEiIHk9IjEyNyIgd2lkdGg9IjgiIGhlaWdodD0iOCIgZmlsbD0iIzBlMTYyMSIvPgogIDxyZWN0IHg9Ijc1IiB5PSIxMjciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiIGZpbGw9IiMwZTE2MjEiLz4KICA8cmVjdCB4PSI2MSIgeT0iMTQxIiB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjMGUxNjIxIi8+CiAgPHJlY3QgeD0iNzUiIHk9IjE0MSIgd2lkdGg9IjgiIGhlaWdodD0iOCIgZmlsbD0iIzBlMTYyMSIvPgogIDxyZWN0IHg9IjYxIiB5PSIxNTUiIHdpZHRoPSI4IiBoZWlnaHQ9IjgiIGZpbGw9IiNkNGU0ZjQiLz4KICA8cmVjdCB4PSI3NSIgeT0iMTU1IiB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjMGUxNjIxIi8+CiAgPHJlY3QgeD0iOTYiIHk9IjYyIiB3aWR0aD0iNDYiIGhlaWdodD0iMTM4IiBmaWxsPSIjNWI5YmQ1Ii8+CiAgPHJlY3QgeD0iMTE1IiB5PSI0NCIgd2lkdGg9IjgiIGhlaWdodD0iMjAiIGZpbGw9IiM1YjliZDUiLz4KICA8cmVjdCB4PSIxMTciIHk9IjM0IiB3aWR0aD0iNCIgaGVpZ2h0PSIxMiIgZmlsbD0iIzViOWJkNSIvPgogIDxyZWN0IHg9IjEwMSIgeT0iNzIiIHdpZHRoPSI5IiBoZWlnaHQ9IjkiIGZpbGw9IiMwZTE2MjEiLz4KICA8cmVjdCB4PSIxMTQiIHk9IjcyIiB3aWR0aD0iOSIgaGVpZ2h0PSI5IiBmaWxsPSIjMGUxNjIxIi8+CiAgPHJlY3QgeD0iMTI3IiB5PSI3MiIgd2lkdGg9IjkiIGhlaWdodD0iOSIgZmlsbD0iIzBlMTYyMSIvPgogIDxyZWN0IHg9IjEwMSIgeT0iODciIHdpZHRoPSI5IiBoZWlnaHQ9IjkiIGZpbGw9IiMwZTE2MjEiLz4KICA8cmVjdCB4PSIxMTQiIHk9Ijg3IiB3aWR0aD0iOSIgaGVpZ2h0PSI5IiBmaWxsPSIjZDRlNGY0Ii8+CiAgPHJlY3QgeD0iMTI3IiB5PSI4NyIgd2lkdGg9IjkiIGhlaWdodD0iOSIgZmlsbD0iIzBlMTYyMSIvPgogIDxyZWN0IHg9IjEwMSIgeT0iMTAyIiB3aWR0aD0iOSIgaGVpZ2h0PSI5IiBmaWxsPSIjMGUxNjIxIi8+CiAgPHJlY3QgeD0iMTE0IiB5PSIxMDIiIHdpZHRoPSI5IiBoZWlnaHQ9IjkiIGZpbGw9IiMwZTE2MjEiLz4KICA8cmVjdCB4PSIxMjciIHk9IjEwMiIgd2lkdGg9IjkiIGhlaWdodD0iOSIgZmlsbD0iI2Q0ZTRmNCIvPgogIDxyZWN0IHg9IjEwMSIgeT0iMTE3IiB3aWR0aD0iOSIgaGVpZ2h0PSI5IiBmaWxsPSIjZDRlNGY0Ii8+CiAgPHJlY3QgeD0iMTE0IiB5PSIxMTciIHdpZHRoPSI5IiBoZWlnaHQ9IjkiIGZpbGw9IiMwZTE2MjEiLz4KICA8cmVjdCB4PSIxMjciIHk9IjExNyIgd2lkdGg9IjkiIGhlaWdodD0iOSIgZmlsbD0iIzBlMTYyMSIvPgogIDxyZWN0IHg9IjEwMSIgeT0iMTMyIiB3aWR0aD0iOSIgaGVpZ2h0PSI5IiBmaWxsPSIjMGUxNjIxIi8+CiAgPHJlY3QgeD0iMTE0IiB5PSIxMzIiIHdpZHRoPSI5IiBoZWlnaHQ9IjkiIGZpbGw9IiNkNGU0ZjQiLz4KICA8cmVjdCB4PSIxMjciIHk9IjEzMiIgd2lkdGg9IjkiIGhlaWdodD0iOSIgZmlsbD0iIzBlMTYyMSIvPgogIDxyZWN0IHg9IjEwMSIgeT0iMTQ3IiB3aWR0aD0iOSIgaGVpZ2h0PSI5IiBmaWxsPSIjMGUxNjIxIi8+CiAgPHJlY3QgeD0iMTE0IiB5PSIxNDciIHdpZHRoPSI5IiBoZWlnaHQ9IjkiIGZpbGw9IiMwZTE2MjEiLz4KICA8cmVjdCB4PSIxMjciIHk9IjE0NyIgd2lkdGg9IjkiIGhlaWdodD0iOSIgZmlsbD0iI2Q0ZTRmNCIvPgogIDxyZWN0IHg9IjE0NiIgeT0iMTE4IiB3aWR0aD0iMzAiIGhlaWdodD0iODIiIGZpbGw9IiMzYTZlOWUiLz4KICA8cmVjdCB4PSIxNTAiIHk9IjEyNSIgd2lkdGg9IjciIGhlaWdodD0iNyIgZmlsbD0iIzBlMTYyMSIvPgogIDxyZWN0IHg9IjE2MSIgeT0iMTI1IiB3aWR0aD0iNyIgaGVpZ2h0PSI3IiBmaWxsPSIjMGUxNjIxIi8+CiAgPHJlY3QgeD0iMTUwIiB5PSIxMzciIHdpZHRoPSI3IiBoZWlnaHQ9IjciIGZpbGw9IiMwZTE2MjEiLz4KICA8cmVjdCB4PSIxNjEiIHk9IjEzNyIgd2lkdGg9IjciIGhlaWdodD0iNyIgZmlsbD0iI2Q0ZTRmNCIvPgogIDxyZWN0IHg9IjE1MCIgeT0iMTQ5IiB3aWR0aD0iNyIgaGVpZ2h0PSI3IiBmaWxsPSIjMGUxNjIxIi8+CiAgPHJlY3QgeD0iMTYxIiB5PSIxNDkiIHdpZHRoPSI3IiBoZWlnaHQ9IjciIGZpbGw9IiMwZTE2MjEiLz4KICA8cmVjdCB4PSIxNSIgeT0iMTk4IiB3aWR0aD0iMTcwIiBoZWlnaHQ9IjQiIGZpbGw9IiM0ZTdmYTgiIHJ4PSIyIi8+Cjwvc3ZnPg==">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0e1621;
+    --surface:   #152030;
+    --card:      #1a2840;
+    --border:    #243550;
+    --accent:    #5b9bd5;
+    --accent2:   #4ec9a0;
+    --danger:    #e05a6a;
+    --text:      #d4e4f4;
+    --muted:     #6a87a8;
+    --input-bg:  #0e1621;
+  }
+
+  body {
+    font-family: 'DM Mono', monospace;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 40px 20px 80px;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(91,155,213,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(91,155,213,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  header {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo-mark {
+    width: 48px; height: 48px;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 20px;
+    color: var(--bg);
+    flex-shrink: 0;
+  }
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(20px, 4vw, 32px);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  header h1 span { color: var(--accent); }
+  .subtitle {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 4px;
+  }
+  .tab {
+    flex: 1;
+    padding: 10px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab.active {
+    background: var(--accent);
+    color: #fff;
+  }
+  .tab:not(.active):hover { color: var(--text); }
+
+  /* Panel */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 28px;
+    margin-bottom: 20px;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: none; } }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Form grid */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+  }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  input, select {
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+    -webkit-appearance: none;
+  }
+  input:focus, select:focus { border-color: var(--accent); }
+  input::placeholder { color: var(--muted); }
+  select option { background: var(--card); }
+
+  /* Buttons */
+  .btn {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 12px 24px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-primary { background: var(--accent); color: var(--bg); }
+  .btn-primary:hover { background: #f0d45a; }
+  .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 6px 12px; font-size: 10px; }
+  .btn-danger:hover { background: var(--danger); color: #fff; }
+  .btn-sm { padding: 8px 16px; font-size: 10px; }
+
+  /* DB Table */
+  .db-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 4px;
+  }
+  .db-table th {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .db-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .db-table tr:last-child td { border-bottom: none; }
+  .db-table tr:hover td { background: rgba(232,200,74,0.03); }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    background: rgba(232,200,74,0.12);
+    color: var(--accent);
+    font-size: 11px;
+  }
+  .empty-state {
+    text-align: center;
+    padding: 32px;
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+  }
+
+  /* Results */
+  .results-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+  }
+  .results-table th {
+    background: var(--surface);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 10px 14px;
+    text-align: right;
+    border: 1px solid var(--border);
+  }
+  .results-table th:first-child { text-align: left; }
+  .results-table td {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    text-align: right;
+  }
+  .results-table td:first-child { text-align: left; }
+  .results-table tr.parking td { color: #7090c0; }
+  .results-table tr.store td { color: #c0a870; }
+  .results-table tr.floor td { color: var(--text); }
+  .results-table tr.section-sep td { padding: 0; height: 3px; background: var(--border); border: none; }
+  .results-table tr.total-row td {
+    background: var(--surface);
+    font-weight: 500;
+    color: var(--accent);
+    border-top: 2px solid var(--accent);
+  }
+  .dash { color: var(--muted); }
+
+  /* Summary block */
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 20px;
+  }
+  .summary-item {
+    background: var(--card);
+    padding: 20px 24px;
+  }
+  .summary-item .s-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .summary-item .s-value {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+  }
+  .summary-item.profit .s-value { color: var(--accent2); }
+  .summary-item.loss .s-value { color: var(--danger); }
+  .summary-item.cost .s-value { color: var(--danger); }
+  .summary-item.sales .s-value { color: var(--accent2); }
+  .summary-item.lot .s-value { color: var(--accent); }
+
+  /* Divider */
+  .section-header {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 24px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-header::before { content: '//'; color: var(--accent); }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--accent);
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    padding: 12px 20px;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 100;
+  }
+  .toast.show { transform: none; opacity: 1; }
+  .toast.error { background: var(--danger); color: #fff; }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .summary { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<!-- Install Banner -->
+<div id="install-banner" style="
+  display:none; position:fixed; bottom:0; left:0; right:0; z-index:200;
+  background:#5b9bd5; color:#fff;
+  padding:14px 20px; align-items:center; justify-content:space-between;
+  font-family:'Syne',sans-serif; font-weight:700; gap:12px;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.4);">
+  <div>
+    <div style="font-size:13px;">📲 Add to Home Screen</div>
+    <div style="font-size:11px;font-weight:400;margin-top:2px;">Install RE Calc as an app</div>
+  </div>
+  <div style="display:flex;gap:8px;">
+    <button onclick="installApp()" style="background:#0e1621;color:#5b9bd5;border:none;padding:10px 18px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;letter-spacing:0.08em;">INSTALL</button>
+    <button onclick="document.getElementById('install-banner').style.display='none'" style="background:transparent;border:2px solid #0d0f14;color:#0d0f14;padding:10px 12px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;">✕</button>
+  </div>
+</div>
+
+<div class="wrapper">
+
+  <header>
+    <div class="logo-mark">RE</div>
+    <div>
+      <h1>Real Estate <span>Project</span> Calculator</h1>
+      <div class="subtitle">Area · Cost · Profit Analysis</div>
+      <div id="sync-status" style="font-size:10px;margin-top:3px;color:var(--muted);letter-spacing:0.06em;">Connecting to cloud...</div>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('calc')">Calculate</button>
+    <button class="tab" onclick="switchTab('db')">Zone Database</button>
+    <button class="tab" onclick="switchTab('history')">History</button>
+  </div>
+
+  <!-- ── CALCULATOR PANEL ── -->
+  <div id="panel-calc" class="panel active">
+
+    <div class="card">
+      <div class="card-title">Project Details</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Area</label>
+          <select id="calc-area" onchange="populateZones()">
+            <option value="">— Select Area —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Zone</label>
+          <select id="calc-zone" onchange="updateZoneInfo()">
+            <option value="">— Select Zone —</option>
+          </select>
+        </div>
+        <div class="form-group" id="zone-info-box" style="display:none;">
+          <label>Zone Permitted Areas</label>
+          <div style="background:var(--input-bg);border:1px solid var(--accent);padding:10px 14px;font-size:12px;line-height:1.8;">
+            <div style="display:flex;justify-content:space-between;">
+              <span style="color:var(--muted);">Per Floor</span>
+              <span id="zone-info-per-floor" style="color:var(--accent);font-weight:500;"></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+              <span style="color:var(--muted);">Total Permitted</span>
+              <span id="zone-info-total" style="color:var(--accent);font-weight:500;"></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+              <span style="color:var(--muted);">Floors</span>
+              <span id="zone-info-floors" style="color:var(--text);"></span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Lot Area (m²)</label>
+          <input type="number" id="lot-area" placeholder="e.g. 1000" min="0">
+        </div>
+        <div class="form-group">
+          <label>Lot Number <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:10px;">(optional)</span></label>
+          <input type="text" id="lot-number" placeholder="e.g. 1042-B">
+        </div>
+        <div class="form-group">
+          <label>Lot Purchase Price</label>
+          <input type="number" id="lot-price" placeholder="e.g. 500000" min="0">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Building Composition</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Parking Floors</label>
+          <input type="number" id="parking-floors" placeholder="0" min="0" value="0">
+        </div>
+        <div class="form-group">
+          <label>Store Floors</label>
+          <input type="number" id="store-floors" placeholder="0" min="0" value="0">
+        </div>
+        <div class="form-group full" style="margin-top:8px;">
+          <label style="text-transform:none;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);">Residential Basement</label>
+          <div onclick="toggleBasement()" id="basement-toggle" style="
+            display:flex;align-items:center;gap:16px;
+            background:var(--input-bg);border:1px solid var(--border);
+            padding:12px 16px;cursor:pointer;margin-top:6px;
+            transition:border-color 0.2s;user-select:none;">
+            <div id="basement-pill" style="
+              position:relative;width:44px;height:24px;
+              background:var(--border);border-radius:12px;
+              flex-shrink:0;transition:background 0.2s;">
+              <div id="basement-knob" style="
+                position:absolute;top:3px;left:3px;
+                width:18px;height:18px;border-radius:50%;
+                background:var(--muted);
+                transition:transform 0.2s,background 0.2s;">
+              </div>
+            </div>
+            <div>
+              <div style="font-size:13px;color:var(--text);font-family:'Syne',sans-serif;font-weight:700;">Include Residential Basement</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">Same area & cost as upper floors · Added as first floor</div>
+            </div>
+          </div>
+          <input type="checkbox" id="include-basement" style="display:none;" onchange="updateBasementToggleUI()">
+        </div>
+
+        <div class="form-group full" style="margin-top:8px;">
+          <label style="text-transform:none;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);">Roof Floor</label>
+          <div onclick="toggleRoof()" id="roof-toggle" style="
+            display:flex;align-items:center;gap:16px;
+            background:var(--input-bg);border:1px solid var(--border);
+            padding:12px 16px;cursor:pointer;margin-top:6px;
+            transition:border-color 0.2s;user-select:none;">
+            <div id="roof-pill" style="
+              position:relative;width:44px;height:24px;
+              background:var(--border);border-radius:12px;
+              flex-shrink:0;transition:background 0.2s;">
+              <div id="roof-knob" style="
+                position:absolute;top:3px;left:3px;
+                width:18px;height:18px;border-radius:50%;
+                background:var(--muted);
+                transition:transform 0.2s,background 0.2s;">
+              </div>
+            </div>
+            <div>
+              <div style="font-size:13px;color:var(--text);font-family:'Syne',sans-serif;font-weight:700;">Include Roof Floor (262)</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">70% of total floor area · Includes Services (70 m²)</div>
+            </div>
+          </div>
+          <input type="checkbox" id="include-roof" style="display:none;" onchange="updateRoofToggleUI()">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Construction Cost (per m²)</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Parking &amp; Store floors</label>
+          <input type="number" id="cost-parking" placeholder="e.g. 250" min="0">
+        </div>
+        <div class="form-group">
+          <label>Upper Floors</label>
+          <input type="number" id="cost-floor" placeholder="e.g. 400" min="0">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Selling Price (per m²)</div>
+      <div class="form-grid">
+        <div class="form-group" id="sell-store-group">
+          <label>Store Floors <span id="sell-store-na" style="display:none;color:var(--muted);font-size:10px;text-transform:none;font-weight:400;">— N/A</span></label>
+          <input type="number" id="sell-store" placeholder="e.g. 600" min="0">
+        </div>
+        <div class="form-group" id="sell-basement-group" style="display:none;">
+          <label>Residential Basement</label>
+          <input type="number" id="sell-basement" placeholder="e.g. 700" min="0">
+        </div>
+        <div class="form-group">
+          <label>Upper Floors</label>
+          <input type="number" id="sell-floor" placeholder="e.g. 800" min="0">
+        </div>
+        <div class="form-group" id="sell-roof-group" style="display:none;">
+          <label>Roof Floor (262)</label>
+          <input type="number" id="sell-roof" placeholder="e.g. 1200" min="0">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Joint Venture</div>
+      <div class="form-group full" style="margin-bottom:12px;">
+        <label style="text-transform:none;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);">Deal Structure</label>
+        <div onclick="toggleJV()" id="jv-toggle" style="
+          display:flex;align-items:center;gap:16px;
+          background:var(--input-bg);border:1px solid var(--border);
+          padding:12px 16px;cursor:pointer;margin-top:6px;
+          transition:border-color 0.2s;user-select:none;">
+          <div id="jv-pill" style="
+            position:relative;width:44px;height:24px;
+            background:var(--border);border-radius:12px;
+            flex-shrink:0;transition:background 0.2s;">
+            <div id="jv-knob" style="
+              position:absolute;top:3px;left:3px;
+              width:18px;height:18px;border-radius:50%;
+              background:var(--muted);
+              transition:transform 0.2s,background 0.2s;">
+            </div>
+          </div>
+          <div>
+            <div style="font-size:13px;color:var(--text);font-family:'Syne',sans-serif;font-weight:700;">Enable Joint Venture</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">Split selling revenue between land owner & contractor</div>
+          </div>
+        </div>
+        <input type="checkbox" id="include-jv" style="display:none;" onchange="updateJVToggleUI()">
+      </div>
+      <div id="jv-fields" style="display:none;">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Land Owner Share (%)</label>
+            <input type="number" id="jv-owner-pct" placeholder="e.g. 40" min="0" max="100" oninput="syncJVPct('owner')">
+          </div>
+          <div class="form-group">
+            <label>Contractor Share (%)</label>
+            <input type="number" id="jv-contractor-pct" placeholder="e.g. 60" min="0" max="100" oninput="syncJVPct('contractor')">
+          </div>
+        </div>
+        <div id="jv-hint" style="font-size:11px;color:var(--muted);margin-top:8px;padding:8px 12px;background:var(--surface);border:1px solid var(--border);">
+          Owner + Contractor must equal 100%
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="calculate()" style="width:100%;justify-content:center;padding:16px;">
+      ▶ Calculate
+    </button>
+
+    <div id="results" style="margin-top:32px; display:none;"></div>
+  </div>
+
+  <!-- ── DATABASE PANEL ── -->
+  <div id="panel-db" class="panel">
+
+    <div class="card">
+      <div class="card-title">Add Zone</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Area Name</label>
+          <input type="text" id="db-area" placeholder="e.g. Downtown">
+        </div>
+        <div class="form-group">
+          <label>Zone Name</label>
+          <input type="text" id="db-zone" placeholder="e.g. A">
+        </div>
+        <div class="form-group">
+          <label>Total Permitted %</label>
+          <input type="number" id="db-total-area" placeholder="e.g. 180" min="0" oninput="autoCalcPerFloor()" style="border-color:var(--accent);">
+        </div>
+        <div class="form-group">
+          <label>Number of Floors</label>
+          <input type="number" id="db-floors" placeholder="e.g. 3" min="1" oninput="autoCalcPerFloor()">
+        </div>
+        <div class="form-group">
+          <label>Permitted Per Floor (%) <span style="color:var(--muted);font-size:10px;font-weight:400;text-transform:none;">auto-calculated</span></label>
+          <input type="number" id="db-pct" placeholder="Auto" min="0" max="100" style="opacity:0.7;" readonly>
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <button class="btn btn-primary btn-sm" onclick="addZone()">+ Add Zone</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Zone Records</div>
+      <div id="db-table-wrap"></div>
+    </div>
+
+  </div>
+
+  <div style="
+    text-align:center;
+    padding: 40px 20px 20px;
+    border-top: 1px solid var(--border);
+    margin-top: 48px;">
+    <div style="
+      font-family:'Syne',sans-serif;
+      font-size:13px;
+      letter-spacing:0.12em;
+      text-transform:uppercase;
+      color:var(--muted);">By</div>
+    <div style="
+      font-family:'Syne',sans-serif;
+      font-weight:800;
+      font-size:18px;
+      letter-spacing:0.04em;
+      color:var(--accent);
+      margin-top:4px;">Eng. Kassem Rammal</div>
+  </div>
+
+  <!-- ── HISTORY PANEL ── -->
+  <div id="panel-history" class="panel">
+    <div class="card">
+      <div class="card-title">Saved Calculations</div>
+      <div style="margin-bottom:16px;">
+        <input type="text" id="history-search" placeholder="Search by area name or lot number..."
+          oninput="renderHistory()"
+          style="width:100%;background:var(--input-bg);border:1px solid var(--border);color:var(--text);
+                 font-family:'DM Mono',monospace;font-size:13px;padding:10px 12px;outline:none;">
+      </div>
+      <div id="history-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// -- State ------------------------------------------------------------------
+const BALCONY = 0.20;
+const WALLS   = 0.20;
+
+// ── Firebase DB helpers ───────────────────────────────────────────────────
+function loadDB() {
+  try { return JSON.parse(localStorage.getItem('zones_db') || '[]'); } catch { return []; }
+}
+function saveDB(data) {
+  localStorage.setItem('zones_db', JSON.stringify(data));
+  if (window.firebaseReady) {
+    if (data && data.length > 0) {
+      window.fbSet('zones_db', data).catch(e => console.warn('FB zones save:', e));
+    } else {
+      window.fbRemove('zones_db').catch(e => console.warn('FB zones remove:', e));
+    }
+  }
+}
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem('calc_history') || '[]'); } catch { return []; }
+}
+function saveHistory(data) {
+  localStorage.setItem('calc_history', JSON.stringify(data));
+  if (window.firebaseReady) {
+    if (data && data.length > 0) {
+      window.fbSet('calc_history', data).catch(e => console.warn('FB history save:', e));
+    } else {
+      // Remove key when empty so listener receives null cleanly
+      window.fbRemove('calc_history').catch(e => console.warn('FB history remove:', e));
+    }
+  }
+}
+// Sync FROM Firebase on load (Firebase wins over localStorage)
+function updateZoneInfo() {
+  const area = document.getElementById('calc-area').value;
+  const zone = document.getElementById('calc-zone').value;
+  const box  = document.getElementById('zone-info-box');
+  if (!area || !zone) { box.style.display = 'none'; return; }
+  const db  = loadDB();
+  const rec = db.find(r => r.area === area && r.zone === zone);
+  if (!rec) { box.style.display = 'none'; return; }
+  const totalPct = (+rec.totalArea || rec.percentage * rec.floors).toFixed(1);
+  document.getElementById('zone-info-per-floor').textContent = (+rec.percentage).toFixed(2) + '%';
+  document.getElementById('zone-info-total').textContent     = totalPct + '%';
+  document.getElementById('zone-info-floors').textContent    = rec.floors + ' floor(s)';
+  box.style.display = '';
+}
+
+function updateSyncStatus(msg, color) {
+  var el = document.getElementById('sync-status');
+  if (el) { el.textContent = msg; el.style.color = color || 'var(--muted)'; }
+}
+function syncFromFirebase() {
+  if (!window.firebaseReady) return;
+  updateSyncStatus('Connecting...', 'var(--accent)');
+
+  // Real-time listener for zones_db — updates ALL users instantly
+  window.fbListen('zones_db', data => {
+    const zones = (data && Array.isArray(data)) ? data : [];
+    localStorage.setItem('zones_db', JSON.stringify(zones));
+    renderDB();
+    populateAreas();
+    updateSyncStatus('Live sync active', 'var(--accent2)');
+  });
+
+  // Real-time listener for calc_history
+  window.fbListen('calc_history', data => {
+    // data is null when empty (Firebase removes empty arrays)
+    const history = (data && Array.isArray(data)) ? data : [];
+    localStorage.setItem('calc_history', JSON.stringify(history));
+    // Refresh history panel if open
+    var histPanel = document.getElementById('panel-history');
+    if (histPanel && histPanel.classList.contains('active')) {
+      renderHistory();
+    }
+  });
+}
+document.addEventListener('firebase-ready', syncFromFirebase);
+document.addEventListener('firebase-ready', () => {
+  updateSyncStatus('Live sync active', 'var(--accent2)');
+});
+
+// -- Toast ------------------------------------------------------------------
+function showToast(msg, isError=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isError ? ' error' : '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.className = 'toast', 2500);
+}
+
+// -- Tabs ------------------------------------------------------------------
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['calc','db','history'][i]===id));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  if (id==='calc')    populateAreas();
+  if (id==='db')      renderDB();
+  if (id==='history') renderHistory();
+}
+
+// -- DB Management ---------------------------------------------------------
+function autoCalcPerFloor() {
+  const total  = parseFloat(document.getElementById('db-total-area').value) || 0;
+  const floors = parseInt(document.getElementById('db-floors').value)        || 0;
+  const pctEl  = document.getElementById('db-pct');
+  if (total > 0 && floors > 0) {
+    pctEl.value = (total / floors).toFixed(2);
+  } else {
+    pctEl.value = '';
+    pctEl.placeholder = 'Auto';
+  }
+}
+
+function addZone() {
+  const area   = document.getElementById('db-area').value.trim().toUpperCase();
+  const zone   = document.getElementById('db-zone').value.trim().toUpperCase();
+  const pct    = parseFloat(document.getElementById('db-pct').value);
+  const floors = parseInt(document.getElementById('db-floors').value);
+
+  if (!area || !zone)          return showToast('Area and zone required', true);
+  const totalPct = parseFloat(document.getElementById('db-total-area').value);
+  if (isNaN(totalPct) || totalPct <= 0) return showToast('Enter total permitted %', true);
+  if (isNaN(floors) || floors < 1)      return showToast('Floors must be >= 1', true);
+  if (isNaN(pct) || pct <= 0)           return showToast('Permitted per floor could not be calculated', true);
+
+  const db = loadDB();
+  if (db.find(r => r.area===area && r.zone===zone)) return showToast('Zone already exists', true);
+
+  const totalArea = parseFloat(document.getElementById('db-total-area').value) || (pct * floors);
+  db.push({ area, zone, percentage: pct, floors, totalArea });
+  saveDB(db);
+  renderDB();
+  populateAreas();
+  ['db-area','db-zone','db-pct','db-floors','db-total-area'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('db-pct').placeholder = 'Auto';
+  showToast(`Added ${area} / Zone ${zone}`);
+}
+
+function deleteZone(area, zone) {
+  const db = loadDB().filter(r => !(r.area===area && r.zone===zone));
+  saveDB(db);
+  renderDB();
+  populateAreas();
+  showToast(`Deleted ${area} / Zone ${zone}`);
+}
+
+function renderDB() {
+  const raw  = loadDB();
+  const db   = [...raw].sort((a, b) => {
+    const areaComp = a.area.localeCompare(b.area);
+    return areaComp !== 0 ? areaComp : a.zone.localeCompare(b.zone);
+  });
+  const wrap = document.getElementById('db-table-wrap');
+  if (!db.length) { wrap.innerHTML = '<div class="empty-state">No zones yet. Add one above.</div>'; return; }
+
+  wrap.innerHTML = `
+    <table class="db-table">
+      <thead><tr>
+        <th>Area</th><th>Zone</th><th>Total %</th><th>Floors</th><th>Per Floor %</th><th></th>
+      </tr></thead>
+      <tbody>
+        ${db.map(r => `
+          <tr>
+            <td>${r.area}</td>
+            <td><span class="badge">Zone ${r.zone}</span></td>
+            <td>${(+r.totalArea || r.percentage * r.floors).toFixed(1)}%</td>
+            <td>${r.floors}</td>
+            <td style="color:var(--accent);">${(+r.percentage).toFixed(2)}%</td>
+            <td><button class="btn btn-danger" onclick="deleteZone('${r.area}','${r.zone}')">Delete</button></td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+// -- Calc selects ----------------------------------------------------------
+function populateAreas() {
+  const db = loadDB();
+  const areas = [...new Set(db.map(r => r.area))].sort();
+  const sel = document.getElementById('calc-area');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">- Select Area -</option>' +
+    areas.map(a => `<option value="${a}" ${a===cur?'selected':''}>${a}</option>`).join('');
+  populateZones();
+}
+
+function populateZones() {
+  const area = document.getElementById('calc-area').value;
+  const db = loadDB().filter(r => r.area===area);
+  const sel = document.getElementById('calc-zone');
+  sel.innerHTML = '<option value="">- Select Zone -</option>' +
+    db.map(r => '<option value="' + r.zone + '">Zone ' + r.zone + '</option>').join('');
+  document.getElementById('zone-info-box').style.display = 'none';
+}
+
+// -- Calculate -------------------------------------------------------------
+function fmt(n)   { return n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function fmtI(n)  { return Math.round(n).toLocaleString('en-US'); }
+
+// roof row color
+// Add to stylesheet dynamically
+(function(){
+  const s = document.createElement('style');
+  s.textContent = '.results-table tr.roof td { color: #c084fc; } .results-table tr.services td { color: #22d3ee; } .results-table tr.basement td { color: #4ade80; }';
+  document.head.appendChild(s);
+})();
+
+function updateRoofToggleUI() {
+  const checked = document.getElementById('include-roof').checked;
+  const pill  = document.getElementById('roof-pill');
+  const knob  = document.getElementById('roof-knob');
+  const wrap  = document.getElementById('roof-toggle');
+  pill.style.background = checked ? 'var(--accent)' : 'var(--border)';
+  knob.style.background = checked ? 'var(--bg)'     : 'var(--muted)';
+  knob.style.transform  = checked ? 'translateX(20px)' : 'none';
+  wrap.style.borderColor = checked ? 'var(--accent)' : 'var(--border)';
+  document.getElementById('sell-roof-group').style.display = checked ? '' : 'none';
+}
+
+function toggleRoof() {
+  const cb = document.getElementById('include-roof');
+  cb.checked = !cb.checked;
+  updateRoofToggleUI();
+}
+
+function updateJVToggleUI() {
+  const checked = document.getElementById('include-jv').checked;
+  const pill  = document.getElementById('jv-pill');
+  const knob  = document.getElementById('jv-knob');
+  const wrap  = document.getElementById('jv-toggle');
+  pill.style.background  = checked ? '#4e94d0' : 'var(--border)';
+  knob.style.background  = checked ? 'var(--bg)' : 'var(--muted)';
+  knob.style.transform   = checked ? 'translateX(20px)' : 'none';
+  wrap.style.borderColor = checked ? '#4e94d0' : 'var(--border)';
+  document.getElementById('jv-fields').style.display = checked ? '' : 'none';
+}
+
+function toggleJV() {
+  const cb = document.getElementById('include-jv');
+  cb.checked = !cb.checked;
+  updateJVToggleUI();
+}
+
+function syncJVPct(changed) {
+  const ownerInput      = document.getElementById('jv-owner-pct');
+  const contractorInput = document.getElementById('jv-contractor-pct');
+  const hint            = document.getElementById('jv-hint');
+  const ownerVal        = parseFloat(ownerInput.value) || 0;
+  const contractorVal   = parseFloat(contractorInput.value) || 0;
+  const total           = ownerVal + contractorVal;
+
+  if (changed === 'owner' && ownerVal >= 0 && ownerVal <= 100) {
+    contractorInput.value = +(100 - ownerVal).toFixed(2);
+  } else if (changed === 'contractor' && contractorVal >= 0 && contractorVal <= 100) {
+    ownerInput.value = +(100 - contractorVal).toFixed(2);
+  }
+  const newTotal = (parseFloat(ownerInput.value)||0) + (parseFloat(contractorInput.value)||0);
+  if (Math.abs(newTotal - 100) < 0.01) {
+    hint.style.color = 'var(--accent2)';
+    hint.textContent = `OK ${ownerInput.value}% Owner + ${contractorInput.value}% Contractor = 100%`;
+  } else {
+    hint.style.color = 'var(--danger)';
+    hint.textContent = `Owner + Contractor must equal 100% (currently ${newTotal.toFixed(1)}%)`;
+  }
+}
+
+function updateBasementToggleUI() {
+  const checked = document.getElementById('include-basement').checked;
+  const pill  = document.getElementById('basement-pill');
+  const knob  = document.getElementById('basement-knob');
+  const wrap  = document.getElementById('basement-toggle');
+  pill.style.background  = checked ? 'var(--accent2)' : 'var(--border)';
+  knob.style.background  = checked ? 'var(--bg)'      : 'var(--muted)';
+  knob.style.transform   = checked ? 'translateX(20px)' : 'none';
+  wrap.style.borderColor = checked ? 'var(--accent2)' : 'var(--border)';
+  document.getElementById('sell-basement-group').style.display = checked ? '' : 'none';
+}
+
+function toggleBasement() {
+  const cb = document.getElementById('include-basement');
+  cb.checked = !cb.checked;
+  updateBasementToggleUI();
+}
+
+function calculate() {
+  const area         = document.getElementById('calc-area').value;
+  const zone         = document.getElementById('calc-zone').value;
+  const lotArea      = parseFloat(document.getElementById('lot-area').value);
+  const lotNumber    = document.getElementById('lot-number').value.trim();
+  const parkingFlrs  = parseInt(document.getElementById('parking-floors').value) || 0;
+  const storeFlrs    = parseInt(document.getElementById('store-floors').value)   || 0;
+  const lotPrice     = parseFloat(document.getElementById('lot-price').value)    || 0;
+  const costParking  = parseFloat(document.getElementById('cost-parking').value);
+  const costFloor    = parseFloat(document.getElementById('cost-floor').value);
+  const sellStore    = parseFloat(document.getElementById('sell-store').value)   || 0;
+  const sellFloor    = parseFloat(document.getElementById('sell-floor').value)   || 0;
+  const includeRoof      = document.getElementById('include-roof').checked;
+  const includeJV        = document.getElementById('include-jv').checked;
+  const jvOwnerPct       = parseFloat(document.getElementById('jv-owner-pct').value)      || 0;
+  const jvContractorPct  = parseFloat(document.getElementById('jv-contractor-pct').value) || 0;
+  const includeBasement = document.getElementById('include-basement').checked;
+  const sellRoof       = parseFloat(document.getElementById('sell-roof').value)     || 0;
+  const sellBasement   = parseFloat(document.getElementById('sell-basement').value) || 0;
+
+  if (!area || !zone)        return showToast('Select an area and zone', true);
+  if (isNaN(lotArea)||lotArea<=0) return showToast('Enter a valid lot area', true);
+  if (isNaN(costParking))    return showToast('Enter parking/store cost', true);
+  if (isNaN(costFloor))      return showToast('Enter upper floor cost', true);
+
+  const db = loadDB();
+  const rec = db.find(r => r.area===area && r.zone===zone);
+  if (!rec) return showToast('Zone not found', true);
+
+  const pct    = rec.percentage;
+  const floors = rec.floors;
+
+  // Per-floor areas
+  const mainArea    = lotArea * (pct / 100);
+  const balcony     = mainArea * BALCONY;
+  const walls       = mainArea * WALLS;
+  const floorTotal  = mainArea + balcony + walls;  // same for all floor types
+
+  // Cost & sell
+  let totalCost = 0, totalSell = 0;
+  const rows = [];
+
+  // Parking rows
+  for (let p = 1; p <= parkingFlrs; p++) {
+    const cost = floorTotal * costParking;
+    totalCost += cost;
+    rows.push({ label: `Parking ${p}`, type: 'parking', main: mainArea, balcony, walls, total: floorTotal, cost, sell: null });
+  }
+
+  // Store rows
+  for (let s = 1; s <= storeFlrs; s++) {
+    const cost = floorTotal * costParking;
+    const sell = floorTotal * sellStore;
+    totalCost += cost; totalSell += sell;
+    rows.push({ label: `Store ${s}`, type: 'store', main: mainArea, balcony, walls, total: floorTotal, cost, sell });
+  }
+
+  // Residential Basement (added as first floor, same area & cost as upper floors)
+  if (includeBasement) {
+    const cost = floorTotal * costFloor;
+    const sell = floorTotal * sellBasement;
+    totalCost += cost; totalSell += sell;
+    rows.push({ label: 'Residential Basement', type: 'basement', main: mainArea, balcony, walls, total: floorTotal, cost, sell });
+  }
+
+  // Upper floors
+  for (let f = 1; f <= floors; f++) {
+    const cost = floorTotal * costFloor;
+    const sell = floorTotal * sellFloor;
+    totalCost += cost; totalSell += sell;
+    rows.push({ label: `Floor ${f}`, type: 'floor', main: mainArea, balcony, walls, total: floorTotal, cost, sell });
+  }
+
+  // Roof floor (roof_262): 70% of floorTotal - 70 sqm, cost same as upper floors
+  if (includeRoof) {
+    const roofTotal   = floorTotal * 0.70;  // 70% of total floor area, no balcony/walls
+    const roofCost    = roofTotal * costFloor;
+    const roofSell    = roofTotal * sellRoof;
+    totalCost += roofCost; totalSell += roofSell;
+    rows.push({ label: 'Roof (262)', type: 'roof', main: roofTotal, balcony: 0, walls: 0, total: roofTotal, cost: roofCost, sell: roofSell });
+
+    // Services: fixed 70 m2, cost same as roof (upper floor rate), no selling price
+    const svcTotal = 70;
+    const svcCost  = svcTotal * costFloor;
+    totalCost += svcCost;
+    rows.push({ label: 'Services', type: 'services', main: 70, balcony: 0, walls: 0, total: svcTotal, cost: svcCost, sell: null });
+  }
+
+  const allFloors     = parkingFlrs + storeFlrs + floors + (includeRoof ? 2 : 0) + (includeBasement ? 1 : 0);
+  const roofRow       = includeRoof ? rows[rows.length-2] : null;  // second-to-last when roof included
+  const svcRow        = includeRoof ? rows[rows.length-1] : null;  // last row = services
+  const regularTotal  = floorTotal * (parkingFlrs + storeFlrs + floors + (includeBasement ? 1 : 0));
+  const grandTotal    = regularTotal + (roofRow ? roofRow.total : 0) + (svcRow ? svcRow.total : 0);
+  const allMain       = mainArea * (parkingFlrs + storeFlrs + floors) + (roofRow ? roofRow.main : 0) + (svcRow ? svcRow.main : 0);
+  const allBalcony    = balcony  * (parkingFlrs + storeFlrs + floors) + (roofRow ? roofRow.balcony : 0);
+  const allWalls      = walls    * (parkingFlrs + storeFlrs + floors) + (roofRow ? roofRow.walls : 0);
+  const totalCostFull = totalCost + lotPrice;
+  const profit        = totalSell - totalCostFull;
+
+  // Render
+  let tableRows = '';
+  let prevType = null;
+  rows.forEach(r => {
+    if (prevType && r.type !== prevType) {
+      tableRows += `<tr class="section-sep"><td colspan="7"></td></tr>`;
+    }
+    tableRows += `
+      <tr class="${r.type}">
+        <td>${r.label}</td>
+        <td>${fmt(r.main)}</td>
+        <td>${fmt(r.balcony)}</td>
+        <td>${fmt(r.walls)}</td>
+        <td>${fmt(r.total)}</td>
+        <td>${fmtI(r.cost)}</td>
+        <td>${r.sell !== null ? fmtI(r.sell) : '<span class="dash">-</span>'}</td>
+      </tr>`;
+    prevType = r.type;
+  });
+
+  const isProfit = profit >= 0;
+  const profitSign = isProfit ? '+' : '';
+
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('results').innerHTML = `
+    <div class="card">
+      <div class="card-title">Results - ${area} / Zone ${zone}</div>
+      <div style="overflow-x:auto;">
+        <table class="results-table">
+          <thead><tr>
+            <th>Floor</th>
+            <th>Main (m2)</th>
+            <th>Balcony (m2)</th>
+            <th>Walls+Stairs (m2)</th>
+            <th>Total (m2)</th>
+            <th>Cost</th>
+            <th>Selling</th>
+          </tr></thead>
+          <tbody>
+            ${tableRows}
+            <tr class="total-row">
+              <td>TOTAL</td>
+              <td>${fmt(allMain)}</td>
+              <td>${fmt(allBalcony)}</td>
+              <td>${fmt(allWalls)}</td>
+              <td>${fmt(grandTotal)}</td>
+              <td>${fmtI(totalCost)}</td>
+              <td>${fmtI(totalSell)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="
+      border-left: 3px solid var(--accent);
+      background: rgba(232,200,74,0.06);
+      padding: 12px 16px;
+      margin-top: 16px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;">
+      <span style="color:var(--accent);font-family:'Syne',sans-serif;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;font-size:10px;">[NOTE] Note</span><br>
+      Balconies and Walls/Staircases are each calculated as <strong style="color:var(--text);">20%</strong> of the permitted floor area per floor.
+    </div>
+
+    <div style="margin-top:20px;">
+      <div style="display:flex;gap:2px;margin-bottom:10px;background:var(--surface);border:1px solid var(--border);padding:4px;">
+        <button id="share-mode-full" onclick="setShareMode('full')"
+          style="flex:1;padding:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;border:none;cursor:pointer;background:var(--accent);color:#fff;transition:all 0.2s;">
+          Full Report
+        </button>
+        <button id="share-mode-summary" onclick="setShareMode('summary')"
+          style="flex:1;padding:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;border:none;cursor:pointer;background:none;color:var(--muted);transition:all 0.2s;">
+          Summary Only
+        </button>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="shareWhatsApp()" style="flex:1;justify-content:center;min-width:180px;background:#25D366;gap:10px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.564 4.14 1.535 5.875L.057 23.876a.5.5 0 00.606.62l6.186-1.585A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.956 0-3.8-.523-5.389-1.437l-.385-.228-3.996 1.024 1.07-3.878-.252-.4A9.955 9.955 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+          Send via WhatsApp
+        </button>
+        <button class="btn btn-secondary" onclick="copyReport()" style="flex:1;justify-content:center;min-width:180px;">
+          Copy Report
+        </button>
+      </div>
+    </div>
+
+    <div class="summary">
+      <div class="summary-item lot">
+        <div class="s-label">Lot Price</div>
+        <div class="s-value">${fmtI(lotPrice)}</div>
+      </div>
+      <div class="summary-item cost">
+        <div class="s-label">Construction Cost</div>
+        <div class="s-value">${fmtI(totalCost)}</div>
+      </div>
+      <div class="summary-item cost">
+        <div class="s-label">Total Cost (Lot + Construction)</div>
+        <div class="s-value">${fmtI(totalCostFull)}</div>
+      </div>
+      <div class="summary-item sales">
+        <div class="s-label">Total Sales</div>
+        <div class="s-value">${fmtI(totalSell)}</div>
+      </div>
+      <div class="summary-item ${isProfit ? 'profit' : 'loss'}" style="grid-column: 1 / -1;">
+        <div class="s-label">Net Profit</div>
+        <div class="s-value">${profitSign}${fmtI(profit)}</div>
+      </div>
+    </div>`;
+
+  if (includeJV && Math.abs(jvOwnerPct + jvContractorPct - 100) < 0.01) {
+    const ownerRev       = totalSell * (jvOwnerPct / 100);
+    const contractRev    = totalSell * (jvContractorPct / 100);
+    const contractProfit = contractRev - totalCost;  // JV: contractor bears construction cost only
+    const cpSign  = contractProfit >= 0 ? '+' : '';
+    const cpColor = contractProfit >= 0 ? 'var(--accent2)' : 'var(--danger)';
+    const jvEl = document.createElement('div');
+    jvEl.style.cssText = 'margin-top:8px;border:1px solid #4e94d0;overflow:hidden;';
+    jvEl.innerHTML =
+        '<div style="background:#4e94d022;padding:10px 16px;font-family:Syne,sans-serif;font-weight:700;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#4e94d0;">'
+      + 'Joint Venture &mdash; ' + jvOwnerPct + '% Owner / ' + jvContractorPct + '% Contractor</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);">'
+      + '<div style="background:var(--card);padding:16px 20px;">'
+      +   '<div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Land Owner (' + jvOwnerPct + '%)</div>'
+      +   '<div style="font-family:Syne,sans-serif;font-weight:800;font-size:20px;color:var(--accent);">' + fmtI(ownerRev) + '</div>'
+      +   '<div style="font-size:11px;color:var(--muted);margin-top:4px;">' + jvOwnerPct + '% x Total Sales</div>'
+      + '</div>'
+      + '<div style="background:var(--card);padding:16px 20px;">'
+      +   '<div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Contractor (' + jvContractorPct + '%)</div>'
+      +   '<div><span id="jv-cp-val"></span></div>'
+      +   '<div style="font-size:11px;color:var(--muted);margin-top:4px;">' + jvContractorPct + '% x Sales - Total Cost</div>'
+      + '</div></div>';
+    document.getElementById('results').appendChild(jvEl);
+    var cpSpan = jvEl.querySelector('#jv-cp-val');
+    cpSpan.textContent = cpSign + fmtI(contractProfit);
+    cpSpan.style.fontFamily = 'Syne,sans-serif';
+    cpSpan.style.fontWeight = '800';
+    cpSpan.style.fontSize = '20px';
+    cpSpan.style.color = cpColor;
+  }
+
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+
+  // Add "New Project" button at the bottom of results
+  var newProjBtn = document.createElement('div');
+  newProjBtn.style.cssText = 'margin-top:24px;';
+  newProjBtn.innerHTML = '<button onclick="resetForm()" style="width:100%;padding:16px;background:var(--surface);border:1px solid var(--border);color:var(--accent);font-family:Syne,sans-serif;font-weight:700;font-size:13px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;">+ New Project</button>';
+  document.getElementById('results').appendChild(newProjBtn);
+
+  // Store last result for WhatsApp sharing
+  const calcResult = { area, zone, lotNumber, lotArea, pct, floors, parkingFlrs, storeFlrs, includeBasement,
+    includeRoof, includeJV, jvOwnerPct, jvContractorPct, rows, grandTotal, allMain, allBalcony, allWalls,
+    totalCost, totalSell, lotPrice, totalCostFull, profit, profitSign, costFloor, costParking,
+    savedAt: new Date().toLocaleString() };
+  window._lastResult = calcResult;
+
+  // Save to history
+  try {
+    const history = loadHistory();
+    history.unshift({ ...calcResult, id: Date.now() });
+    saveHistory(history);
+  } catch(e) {}
+}
+
+var _shareMode = 'full';
+function setShareMode(mode) {
+  _shareMode = mode;
+  var fullBtn    = document.getElementById('share-mode-full');
+  var summaryBtn = document.getElementById('share-mode-summary');
+  if (mode === 'full') {
+    fullBtn.style.background    = 'var(--accent)';
+    fullBtn.style.color         = '#fff';
+    summaryBtn.style.background = 'none';
+    summaryBtn.style.color      = 'var(--muted)';
+  } else {
+    summaryBtn.style.background = 'var(--accent)';
+    summaryBtn.style.color      = '#fff';
+    fullBtn.style.background    = 'none';
+    fullBtn.style.color         = 'var(--muted)';
+  }
+}
+
+function buildWhatsAppMessage() {
+  const r = window._lastResult;
+  if (!r) return '';
+  const mode = _shareMode;
+
+  const sep  = '-'.repeat(32);
+  const fmtN = n => Math.round(n).toLocaleString('en-US');
+  const fmtD = n => n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+  let lines = [];
+  lines.push('[BLDG] *Real Estate Project Calculator*');
+  lines.push(sep);
+  lines.push(`[PIN] *Area:* ${r.area}  |  *Zone:* ${r.zone}`);
+  if (r.lotNumber) lines.push(`[NUM] *Lot Number:* ${r.lotNumber}`);
+  lines.push(`[NOTE] *Lot Area:* ${fmtD(r.lotArea)} m2  |  *Zone %:* ${r.pct}%`);
+  lines.push(`[OFF] *Parking:* ${r.parkingFlrs}  |  *Store:* ${r.storeFlrs}  |  *Floors:* ${r.floors}${r.includeBasement ? '  |  *Basement:* OK' : ''}${r.includeRoof ? '  |  *Roof (262):* OK' : ''}`);
+  lines.push(sep);
+  if (mode === 'full') {
+    lines.push('*Floor Breakdown*');
+    lines.push('');
+    let prevType = null;
+    r.rows.forEach(row => {
+      if (prevType && row.type !== prevType) lines.push('');
+      const icon = row.type==='parking' ? '[P]' : row.type==='store' ? '[STORE]' : row.type==='roof' ? '[HOME]' : row.type==='services' ? '[TOOL]' : row.type==='basement' ? '' : '';
+      const sellStr = row.sell !== null ? '  |  Sell: ' + fmtN(row.sell) : '';
+      lines.push(icon + ' *' + row.label + '*');
+      lines.push('   Area: ' + fmtD(row.total) + ' m2  |  Cost: ' + fmtN(row.cost) + sellStr);
+      prevType = row.type;
+    });
+    lines.push('');
+    lines.push(sep);
+  }
+  lines.push('*Summary*');
+  lines.push(`[TAG] Lot Price:          ${fmtN(r.lotPrice)}`);
+  lines.push(`[HAMMER] Construction Cost:  ${fmtN(r.totalCost)}`);
+  lines.push(`[MONEY] Total Cost:         ${fmtN(r.totalCostFull)}`);
+  lines.push(`[CHART] Total Sales:        ${fmtN(r.totalSell)}`);
+  lines.push(sep);
+  const profitIcon = r.profit >= 0 ? '(+)' : '(-)';
+  lines.push(`${profitIcon} *Net Profit: ${r.profitSign}${fmtN(r.profit)}*`);
+  lines.push(sep);
+  lines.push('_Generated by Real Estate Project Calculator_');
+  if (r.includeJV && Math.abs((r.jvOwnerPct||0) + (r.jvContractorPct||0) - 100) < 0.01) {
+    const ownerRev = r.totalSell * (r.jvOwnerPct / 100);
+    const contractorRev = r.totalSell * (r.jvContractorPct / 100);
+    const contractorProfit = contractorRev - r.totalCost;  // JV: construction cost only
+    const cpSign = contractorProfit >= 0 ? '+' : '';
+    lines.push('');
+    lines.push(sep);
+    lines.push(`[HANDSHAKE] *Joint Venture (${r.jvOwnerPct}% / ${r.jvContractorPct}%)*`);
+    lines.push(`[HOME] Land Owner (${r.jvOwnerPct}%):   ${fmtN(ownerRev)}`);
+    lines.push(`[BLDG] Contractor (${r.jvContractorPct}%): ${cpSign}${fmtN(contractorProfit)}`);
+    lines.push(sep);
+  }
+  lines.push(' *By: Eng. Kassem Rammal Office*');
+
+  return lines.join('\n');
+}
+
+function shareWhatsApp() {
+  if (!window._lastResult) return showToast('Run a calculation first', true);
+  const msg = buildWhatsAppMessage();
+  const url = 'https://wa.me/?text=' + encodeURIComponent(msg);
+  window.open(url, '_blank');
+}
+
+function copyReport() {
+  if (!window._lastResult) return showToast('Run a calculation first', true);
+  const msg = buildWhatsAppMessage();
+  navigator.clipboard.writeText(msg).then(() => showToast('Report copied to clipboard!'));
+}
+
+// -- History ---------------------------------------------------------------
+
+function renderHistory() {
+  const allHistory = loadHistory();
+  const searchEl   = document.getElementById('history-search');
+  const query      = searchEl ? searchEl.value.trim().toLowerCase() : '';
+  const history    = query
+    ? allHistory.filter(r =>
+        (r.area   || '').toLowerCase().includes(query) ||
+        (r.lotNumber || '').toLowerCase().includes(query)
+      )
+    : allHistory;
+
+  const wrap = document.getElementById('history-list');
+  if (!allHistory.length) {
+    wrap.innerHTML = '<div class="empty-state">No saved calculations yet. Run a calculation to save it here.</div>';
+    return;
+  }
+  if (!history.length) {
+    wrap.innerHTML = '<div class="empty-state">No results matching "' + query + '".</div>';
+    return;
+  }
+
+  wrap.innerHTML = history.map((r, idx) => {
+    const isProfit = r.profit >= 0;
+    const profitColor = isProfit ? 'var(--accent2)' : 'var(--danger)';
+    const profitSign  = isProfit ? '+' : '';
+    const lotLabel    = r.lotNumber ? ` . Lot ${r.lotNumber}` : '';
+    const fmtN = n => Math.round(n).toLocaleString('en-US');
+    const fmtD = n => (+n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+    // Build floor rows for detail view
+    const floorRows = (r.rows || []).map(row => `
+      <tr class="${row.type}">
+        <td>${row.label}</td>
+        <td style="text-align:right">${fmtD(row.total)}</td>
+        <td style="text-align:right">${fmtN(row.cost)}</td>
+        <td style="text-align:right">${row.sell !== null ? fmtN(row.sell) : '-'}</td>
+      </tr>`).join('');
+
+    return `
+    <div style="border:1px solid var(--border);margin-bottom:12px;overflow:hidden;">
+      <!-- Header row -->
+      <div onclick="toggleHistoryItem(${r.id})" style="
+        display:flex;align-items:center;justify-content:space-between;
+        padding:14px 16px;cursor:pointer;background:var(--surface);
+        gap:12px;user-select:none;" id="hist-hdr-${r.id}">
+        <div style="flex:1;min-width:0;">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--text);">
+            ${r.area} . Zone ${r.zone}${lotLabel}
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;">
+            Lot: ${fmtD(r.lotArea)} m2  .  ${r.savedAt}
+          </div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:15px;color:${profitColor};">
+            ${profitSign}${fmtN(r.profit)}
+          </div>
+          <div style="font-size:10px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;">Net Profit</div>
+        </div>
+        <div style="color:var(--muted);font-size:16px;" id="hist-arrow-${r.id}">></div>
+      </div>
+
+      <!-- Detail view (collapsed by default) -->
+      <div id="hist-detail-${r.id}" style="display:none;padding:16px;border-top:1px solid var(--border);">
+        <table class="results-table" style="margin-bottom:12px;">
+          <thead><tr>
+            <th style="text-align:left">Floor</th>
+            <th>Total (m2)</th>
+            <th>Cost</th>
+            <th>Selling</th>
+          </tr></thead>
+          <tbody>${floorRows}</tbody>
+        </table>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;margin-top:8px;">
+          <div style="padding:10px;background:var(--surface);border:1px solid var(--border);">
+            <div style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;">Lot Price</div>
+            <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--accent);margin-top:2px;">${fmtN(r.lotPrice)}</div>
+          </div>
+          <div style="padding:10px;background:var(--surface);border:1px solid var(--border);">
+            <div style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;">Construction</div>
+            <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--danger);margin-top:2px;">${fmtN(r.totalCost)}</div>
+          </div>
+          <div style="padding:10px;background:var(--surface);border:1px solid var(--border);">
+            <div style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;">Total Cost</div>
+            <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--danger);margin-top:2px;">${fmtN(r.totalCostFull)}</div>
+          </div>
+          <div style="padding:10px;background:var(--surface);border:1px solid var(--border);">
+            <div style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;">Total Sales</div>
+            <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--accent2);margin-top:2px;">${fmtN(r.totalSell)}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <button class="btn btn-secondary btn-sm" onclick="shareHistoryItem(${r.id})" style="flex:1;justify-content:center;background:#25D366;color:#fff;border-color:#25D366;">
+            [PHONE] WhatsApp
+          </button>
+          <button class="btn btn-danger" onclick="deleteHistoryItem(${r.id})" style="flex:1;justify-content:center;">
+            [DELETE] Delete
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleHistoryItem(id) {
+  const detail = document.getElementById('hist-detail-'+id);
+  const arrow  = document.getElementById('hist-arrow-'+id);
+  const open   = detail.style.display === 'none';
+  detail.style.display = open ? '' : 'none';
+  arrow.textContent    = open ? 'v' : '>';
+}
+
+function deleteHistoryItem(id) {
+  let history = loadHistory();
+  history = history.filter(r => r.id !== id);
+  saveHistory(history);
+  renderHistory();
+  showToast('Record deleted');
+}
+
+function shareHistoryItem(id) {
+  const history = loadHistory();
+  const r = history.find(h => h.id === id);
+  if (!r) return;
+  window._lastResult = r;
+  const msg = buildWhatsAppMessage();
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+}
+
+function resetForm() {
+  // Clear all inputs
+  ['calc-area','calc-zone'].forEach(id => document.getElementById(id).value = '');
+  ['lot-area','lot-number','lot-price','parking-floors','store-floors',
+   'cost-parking','cost-floor','sell-store','sell-floor','sell-basement','sell-roof',
+   'jv-owner-pct','jv-contractor-pct'].forEach(id => {
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  // Reset parking/store floors to 0
+  document.getElementById('parking-floors').value = '0';
+  document.getElementById('store-floors').value   = '0';
+  // Reset toggles
+  ['include-roof','include-basement','include-jv'].forEach(id => {
+    document.getElementById(id).checked = false;
+  });
+  updateRoofToggleUI();
+  updateBasementToggleUI();
+  updateJVToggleUI();
+  // Hide sell-store
+  document.getElementById('sell-store-group').style.display = 'none';
+  // Hide results
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('results').innerHTML = '';
+  // Scroll back to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// -- Init ------------------------------------------------------------------
+
+// Freeze store selling price when store floors = 0
+document.getElementById('store-floors').addEventListener('input', function() {
+  const storeFlrs = parseInt(this.value) || 0;
+  const group = document.getElementById('sell-store-group');
+  const input = document.getElementById('sell-store');
+  if (storeFlrs === 0) {
+    input.value = '';
+    group.style.display = 'none';
+  } else {
+    group.style.display = '';
+  }
+});
+
+// Init state on load - hide store selling if store floors starts at 0
+(function() {
+  const storeFlrs = parseInt(document.getElementById('store-floors').value) || 0;
+  if (storeFlrs === 0) {
+    document.getElementById('sell-store-group').style.display = 'none';
+  }
+})();
+
+populateAreas();
+renderDB();
+</script>
+<script>
+// Register service worker for offline use & PWA install
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE = 're-calc-v1';
+    self.addEventListener('install', e => {
+      e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/'])));
+      self.skipWaiting();
+    });
+    self.addEventListener('activate', e => {
+      e.waitUntil(caches.keys().then(keys =>
+        Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+      ));
+      self.clients.claim();
+    });
+    self.addEventListener('fetch', e => {
+      e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+    });
+  `;
+  const blob = new Blob([swCode], {type: 'application/javascript'});
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(() => {});
+}
+
+// Show install prompt on Android Chrome
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show install banner
+  const banner = document.getElementById('install-banner');
+  if (banner) banner.style.display = 'flex';
+});
+
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      const banner = document.getElementById('install-banner');
+      if (banner) banner.style.display = 'none';
+    });
+  }
+}
+
+window.addEventListener('appinstalled', () => {
+  const banner = document.getElementById('install-banner');
+  if (banner) banner.style.display = 'none';
+});
+</script>
+</body>
+</html>
